@@ -13,7 +13,10 @@ def waw(*args) -> datetime:
 
 
 def test_summer_order_before_cutoff_is_accepted():
-    assert is_before_cutoff(date(2027, 7, 15), waw(2027, 7, 14, 13, 59)) is True
+    assert (
+        is_before_cutoff(date(2027, 7, 15), waw(2027, 7, 14, 13, 59, 59))
+        is True
+    )
 
 
 def test_summer_order_at_cutoff_is_rejected():
