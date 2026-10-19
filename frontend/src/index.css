@@ -52,7 +52,6 @@ h1 {
   color: #6b5a4b;
 }
 
-.date-panel,
 .section-heading {
   display: flex;
   align-items: flex-start;
@@ -71,7 +70,10 @@ h1 {
   min-width: 12rem;
 }
 
-.store-field {
+.form-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -117,15 +119,6 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.55;
   cursor: wait;
-}
-
-.date-badge {
-  padding: 0.3rem 0.6rem;
-  border-radius: 999px;
-  color: #6f3b0f;
-  background: #f6eadc;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
 }
 
 .table-scroll {
@@ -190,10 +183,13 @@ th {
     padding: 1.25rem 0.75rem;
   }
 
-  .date-panel,
   .section-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .form-fields {
+    grid-template-columns: 1fr;
   }
 
   .date-control {

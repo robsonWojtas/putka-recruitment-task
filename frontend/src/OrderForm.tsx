@@ -3,11 +3,15 @@ import { fetchJson, type Order, type Product, type Store } from "./api";
 
 type OrderFormProps = {
   deliveryDate: string;
+  minimumDeliveryDate: string;
+  onDeliveryDateChange: (date: string) => void;
   onOrderCreated: () => void;
 };
 
 export default function OrderForm({
   deliveryDate,
+  minimumDeliveryDate,
+  onDeliveryDateChange,
   onOrderCreated,
 }: OrderFormProps) {
   const [stores, setStores] = useState<Store[]>([]);
@@ -122,21 +126,34 @@ export default function OrderForm({
       )}
       {!loading && !loadError && (
         <form onSubmit={handleSubmit}>
-          <label className="field store-field">
-            <span>Sklep</span>
-            <select
-              value={selectedStoreId}
-              onChange={(event) => setSelectedStoreId(event.target.value)}
-              required
-            >
-              <option value="">Wybierz sklep</option>
-              {stores.map((store) => (
-                <option key={store.id} value={store.id}>
-                  {store.name} — {store.address}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="form-fields">
+            <label className="field">
+              <span>Sklep</span>
+              <select
+                value={selectedStoreId}
+                onChange={(event) => setSelectedStoreId(event.target.value)}
+                required
+              >
+                <option value="">Wybierz sklep</option>
+                {stores.map((store) => (
+                  <option key={store.id} value={store.id}>
+                    {store.name} — {store.address}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="field">
+              <span>Data dostawy</span>
+              <input
+                type="date"
+                value={deliveryDate}
+                min={minimumDeliveryDate}
+                onChange={(event) => onDeliveryDateChange(event.target.value)}
+                required
+              />
+            </label>
+          </div>
 
           <div className="table-scroll">
             <table className="order-table">

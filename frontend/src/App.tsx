@@ -1,6 +1,5 @@
 import { useState } from "react";
 import OrderForm from "./OrderForm";
-import ProductList from "./ProductList";
 import ProductionPlan from "./ProductionPlan";
 
 function tomorrowInWarsaw(): string {
@@ -22,8 +21,16 @@ function tomorrowInWarsaw(): string {
 }
 
 export default function App() {
-  const [selectedDate, setSelectedDate] = useState(tomorrowInWarsaw);
+  const [minimumDeliveryDate] = useState(tomorrowInWarsaw);
+  const [deliveryDate, setDeliveryDate] = useState(minimumDeliveryDate);
+  const [planDate, setPlanDate] = useState(minimumDeliveryDate);
   const [planRefreshVersion, setPlanRefreshVersion] = useState(0);
+
+  function handleOrderCreated() {
+    if (deliveryDate === planDate) {
+      setPlanRefreshVersion((version) => version + 1);
+    }
+  }
 
   return (
     <main>
@@ -32,42 +39,18 @@ export default function App() {
         <p className="subtitle">Plan produkcji</p>
       </header>
 
-      <section className="panel date-panel" aria-labelledby="date-heading">
-        <div>
-          <h2 id="date-heading">Data dostawy</h2>
-          <p className="section-description">
-            Wybrana data jest wspólna dla zamówienia i planu produkcji.
-          </p>
-        </div>
-        <label className="date-control">
-          <span>Data</span>
-          <input
-            type="date"
-            value={selectedDate}
-            min={tomorrowInWarsaw()}
-            onChange={(event) => setSelectedDate(event.target.value)}
-            required
-          />
-        </label>
-      </section>
-
       <OrderForm
-        deliveryDate={selectedDate}
-        onOrderCreated={() => setPlanRefreshVersion((version) => version + 1)}
+        deliveryDate={deliveryDate}
+        minimumDeliveryDate={minimumDeliveryDate}
+        onDeliveryDateChange={setDeliveryDate}
+        onOrderCreated={handleOrderCreated}
       />
 
       <ProductionPlan
-        date={selectedDate}
+        date={planDate}
+        onDateChange={setPlanDate}
         refreshVersion={planRefreshVersion}
       />
-
-      <section className="panel" aria-labelledby="products-heading">
-        <h2 id="products-heading">Aktywne produkty</h2>
-        <p className="section-description">
-          Katalog produktów dostępnych obecnie do zamówienia.
-        </p>
-        <ProductList />
-      </section>
     </main>
   );
 }

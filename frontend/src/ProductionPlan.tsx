@@ -3,11 +3,13 @@ import { fetchJson, type ProductionPlan as ProductionPlanData } from "./api";
 
 type ProductionPlanProps = {
   date: string;
+  onDateChange: (date: string) => void;
   refreshVersion: number;
 };
 
 export default function ProductionPlan({
   date,
+  onDateChange,
   refreshVersion,
 }: ProductionPlanProps) {
   const [plan, setPlan] = useState<ProductionPlanData | null>(null);
@@ -47,7 +49,15 @@ export default function ProductionPlan({
           <h2 id="plan-heading">Plan produkcji</h2>
           <p className="section-description">Suma zamówień wszystkich sklepów.</p>
         </div>
-        {date && <span className="date-badge">{date}</span>}
+        <label className="date-control">
+          <span>Data planu</span>
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => onDateChange(event.target.value)}
+            required
+          />
+        </label>
       </div>
 
       {loading && <p className="status">Ładowanie planu…</p>}
