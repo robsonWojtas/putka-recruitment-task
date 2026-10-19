@@ -1,7 +1,6 @@
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,13 +8,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.cutoff import is_before_cutoff
+from app.cutoff import WARSAW, is_before_cutoff
 from app.db import Base, SessionLocal, engine, get_db
 from app.models import Order, OrderItem, Product, Store
 from app.schemas import OrderCreate, OrderOut, ProductOut, StoreOut
 from app.seed import seed
-
-WARSAW = ZoneInfo("Europe/Warsaw")
 
 
 def get_current_time() -> datetime:
