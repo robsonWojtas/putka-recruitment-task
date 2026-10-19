@@ -57,3 +57,19 @@ class OrderOut(BaseModel):
     delivery_date: date
     created_at: datetime
     items: list[OrderItemOut]
+
+
+class ProductionPlanProductOut(BaseModel):
+    product_id: int
+    name: str
+    quantity: int
+
+
+class ProductionPlanCategoryOut(BaseModel):
+    category: str
+    products: list[ProductionPlanProductOut]
+
+
+class ProductionPlanOut(BaseModel):
+    date: date
+    categories: list[ProductionPlanCategoryOut]

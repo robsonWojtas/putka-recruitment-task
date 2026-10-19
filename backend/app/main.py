@@ -1,17 +1,25 @@
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.cutoff import WARSAW, is_before_cutoff
 from app.db import Base, SessionLocal, engine, get_db
 from app.models import Order, OrderItem, Product, Store
-from app.schemas import OrderCreate, OrderOut, ProductOut, StoreOut
+from app.schemas import (
+    OrderCreate,
+    OrderOut,
+    ProductionPlanCategoryOut,
+    ProductionPlanOut,
+    ProductionPlanProductOut,
+    ProductOut,
+    StoreOut,
+)
 from app.seed import seed
 
 
@@ -144,3 +152,52 @@ def create_order(
         ) from exc
 
     return order
+
+
+@app.get("/production-plan", response_model=ProductionPlanOut)
+def get_production_plan(
+    plan_date: date = Query(alias="date"),
+    db: Session = Depends(get_db),
+):
+    ordered_quantities = (
+        select(
+            OrderItem.product_id.label("product_id"),
+            func.sum(OrderItem.quantity).label("quantity"),
+        )
+        .join(Order, Order.id == OrderItem.order_id)
+        .where(Order.delivery_date == plan_date)
+        .group_by(OrderItem.product_id)
+        .subquery()
+    )
+
+    stmt = (
+        select(
+            Product.id.label("product_id"),
+            Product.name,
+            Product.category,
+            func.coalesce(ordered_quantities.c.quantity, 0).label("quantity"),
+        )
+        .outerjoin(
+            ordered_quantities,
+            ordered_quantities.c.product_id == Product.id,
+        )
+        .order_by(Product.category, Product.name)
+    )
+
+    products_by_category: dict[str, list[ProductionPlanProductOut]] = {}
+    for row in db.execute(stmt):
+        products_by_category.setdefault(row.category, []).append(
+            ProductionPlanProductOut(
+                product_id=row.product_id,
+                name=row.name,
+                quantity=int(row.quantity),
+            )
+        )
+
+    return ProductionPlanOut(
+        date=plan_date,
+        categories=[
+            ProductionPlanCategoryOut(category=category, products=products)
+            for category, products in products_by_category.items()
+        ],
+    )
